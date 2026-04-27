@@ -20,7 +20,7 @@ else:
     min_samples = st.slider("Min Samples", 2, 10, 3)
 
 def grayscale(img):
-    gray = cv2.cvtColor(img,cv2.COLOR_BG2GRAY)
+    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     return gray
 def image_enhancement(img_gray):
     clahe = cv2.createCLAHE(2.0,(8,8))
