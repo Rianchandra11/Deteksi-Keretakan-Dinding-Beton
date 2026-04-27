@@ -44,12 +44,12 @@ def process_image(file_bytes):
         gray = grayscale(img)
         blur = blurimg(gray)
         enhanced = image_enhancement(blur)
-        canny = cv2.Canny(enhanced, 30, 100)
+        canny = cv2.Canny(enhanced, 50, 150)
 
         # Morphology
         kernel = np.ones((3,3), np.uint8)
         closing = cv2.morphologyEx(canny, cv2.MORPH_CLOSE, kernel)
-        dilated = cv2.dilate(closing, kernel, iterations=1)
+        dilated = cv2.dilate(closing, kernel, iterations=7)
 
         # Contour
         contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
