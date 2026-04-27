@@ -24,6 +24,7 @@ def grayscale(img):
     return gray
 def blurimg(img_gray):
     blur = cv2.medianBlur(img_gray, 27,0)
+    return blur
 def image_enhancement(img_gray):
     clahe = cv2.createCLAHE(2.0,(8,8))
     enhanced = clahe.apply(img_gray)
