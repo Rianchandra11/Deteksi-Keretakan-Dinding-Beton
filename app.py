@@ -119,7 +119,7 @@ def process_image(file_bytes):
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.4, color, 1)
 
-        return original, vis
+        return original,closing,dilated, vis
 
     except Exception as e:
         st.error(f"Error: {e}")
@@ -132,13 +132,16 @@ if uploaded_file is None:
 else:
     file_bytes = uploaded_file.read()
 
-    original, result = process_image(file_bytes)
+    original,clos,dil, result = process_image(file_bytes)
 
     if original is not None:
-        col1, col2 = st.columns(2)
+        col1, col2, col3, col4 = st.columns(4)
 
         with col1:
             st.image(original, caption="Gambar Asli", channels="BGR")
-
         with col2:
+            st.image(clos, caption= "Closing")
+        with col3: 
+            st.image(dil,caption="Dilation (Closing)")
+        with col4:
             st.image(result, caption="Hasil Clustering", channels="BGR")
