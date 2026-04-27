@@ -5,7 +5,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans, DBSCAN
 
 st.title("Deteksi Retakan (Clustering)")
-st.write("App berhasil jalan 🚀")
 
 # Upload
 uploaded_file = st.file_uploader("Upload gambar", type=["jpg","png","jpeg"])
@@ -20,31 +19,32 @@ else:
     eps = st.slider("EPS (DBSCAN)", 0.1, 1.5, 0.5)
     min_samples = st.slider("Min Samples", 2, 10, 3)
 
+def grayscale(img):
+    gray = cv2.cvtColor(img,cv2.COLOR_BAYER_BG2GRAY)
+    return gray
+def image_enhancement(img_gray):
+    clahe = cv2.createCLAHE(2.0,(8,8))
+    enhanced = clahe.apply(img_gray)
+    return enhanced
 
 def process_image(file_bytes):
     try:
-        # decode
         file_bytes = np.asarray(bytearray(file_bytes), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
         if img is None:
-            st.error("Gagal membaca gambar ❌")
+            st.error("Gagal membaca gambar")
             return None, None
 
         original = img.copy()
 
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-        # CLAHE
-        clahe = cv2.createCLAHE(2.0, (8,8))
-        enhanced = clahe.apply(gray)
-
-        # Edge
-        edges = cv2.Canny(enhanced, 30, 100)
+        gray = grayscale(img)
+        enhanced = image_enhancement(gray)
+        canny = cv2.Canny(enhanced, 30, 100)
 
         # Morphology
         kernel = np.ones((3,3), np.uint8)
-        closing = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+        closing = cv2.morphologyEx(canny, cv2.MORPH_CLOSE, kernel)
         dilated = cv2.dilate(closing, kernel, iterations=1)
 
         # Contour
