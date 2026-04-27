@@ -72,7 +72,7 @@ def process_image(file_bytes):
 
         if len(features) < 2:
             st.warning("Contour terlalu sedikit ⚠️")
-            return original, original
+            return original, original, original, original
 
         X = np.array(features)
 
@@ -119,7 +119,7 @@ def process_image(file_bytes):
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.4, color, 1)
 
-        return original,closing,dilated, vis
+        return original,closing,dilated,vis
 
     except Exception as e:
         st.error(f"Error: {e}")
@@ -132,7 +132,7 @@ if uploaded_file is None:
 else:
     file_bytes = uploaded_file.read()
 
-    original,clos,dil, result = process_image(file_bytes)
+    original,clos,dil,result = process_image(file_bytes)
 
     if original is not None:
         col1, col2, col3, col4 = st.columns(4)
