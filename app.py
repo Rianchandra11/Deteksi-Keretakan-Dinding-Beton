@@ -11,7 +11,7 @@ def grayscale(img):
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     return gray
 def blurimg(img_gray):
-    blur = cv2.GaussianBlur(img_gray, (3,3),0)
+    blur = cv2.GaussianBlur(img_gray, (7,7),0)
     return blur
 def image_enhancement(img_gray):
     clahe = cv2.createCLAHE(2.0,(8,8))
@@ -25,7 +25,7 @@ def process_image(file_bytes):
 
         if img is None:
             st.error("Gagal membaca gambar")
-            return None, None, None, None, None, None, None, 0
+            return None, None, None, None, None, None, None, None, 0
 
         original = img.copy()
 
@@ -36,7 +36,7 @@ def process_image(file_bytes):
 
         kernel = np.ones((3,3), np.uint8)
         closing = cv2.morphologyEx(canny, cv2.MORPH_CLOSE, kernel)
-        dilated = cv2.dilate(closing, kernel, iterations=2)
+        dilated = cv2.dilate(closing, kernel, iterations=1)
 
         contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -60,11 +60,11 @@ def process_image(file_bytes):
                             (0,255,0),
                             1)
 
-        return original, gray, blur, enhanced, closing, dilated, detect, total_contour
+        return original, gray, blur, enhanced, canny, closing, dilated, detect, total_contour
 
     except Exception as e:
         st.error(f"Error: {e}")
-        return None, None, None, None, None, None, None, 0
+        return None, None, None, None, None, None, None, None, 0
 
 # MAIN
 if uploaded_file is None:
@@ -72,7 +72,7 @@ if uploaded_file is None:
 else:
     file_bytes = uploaded_file.read()
 
-    original, gray, blur, enhanced, closing, dilated, detect, total_contour = process_image(file_bytes)
+    original, gray, blur, enhanced, canny, closing, dilated, detect, total_contour = process_image(file_bytes)
 
     if original is not None:
         if total_contour > 0:
@@ -95,16 +95,17 @@ else:
         with col2:
             st.image(gray, caption="Grayscale")
         with col3:
-            st.image(blur, caption="Blur")
+            st.image(blur, caption="Gaussian Blur")
         with col4:
             st.image(enhanced, caption="Enhancement")
         st.divider()
-        st.subheader("⚙️ Edge, Morphology & Contour")
-        col5, col6, col7 = st.columns(3)
-
+        st.subheader("Canny, Edge, Morphology & Contour")
+        col5, col6, col7, col8 = st.columns(4)
         with col5:
-            st.image(closing, caption="Closing")
+            st.image(canny, caption="Canny")
         with col6:
-            st.image(dilated, caption="Dilation")
+            st.image(closing, caption="Closing")
         with col7:
+            st.image(dilated, caption="Dilation")
+        with col8:
             st.image(detect, caption="Detected Crack", channels="BGR")
