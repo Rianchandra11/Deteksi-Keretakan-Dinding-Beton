@@ -22,6 +22,8 @@ else:
 def grayscale(img):
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     return gray
+def blurimg(img_gray):
+    blur = cv2.medianBlur(img_gray, 27,0)
 def image_enhancement(img_gray):
     clahe = cv2.createCLAHE(2.0,(8,8))
     enhanced = clahe.apply(img_gray)
@@ -39,7 +41,8 @@ def process_image(file_bytes):
         original = img.copy()
 
         gray = grayscale(img)
-        enhanced = image_enhancement(gray)
+        blur = blurimg(gray)
+        enhanced = image_enhancement(blur)
         canny = cv2.Canny(enhanced, 30, 100)
 
         # Morphology
