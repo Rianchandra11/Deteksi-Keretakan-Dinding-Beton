@@ -23,7 +23,7 @@ def grayscale(img):
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     return gray
 def blurimg(img_gray):
-    blur = cv2.medianBlur(img_gray, 27,0)
+    blur = cv2.medianBlur(img_gray, 21,0)
     return blur
 def image_enhancement(img_gray):
     clahe = cv2.createCLAHE(2.0,(8,8))
@@ -123,7 +123,7 @@ def process_image(file_bytes):
 
     except Exception as e:
         st.error(f"Error: {e}")
-        return None, None
+        return None, None, None, None
 
 
 # MAIN
