@@ -53,73 +53,25 @@ def process_image(file_bytes):
 
         # Contour
         contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        clean_close = np.zeros_like(dilated)
 
-        features = []
-        valid_contours = []
 
         for cnt in contours:
-            length = cv2.arcLength(cnt, True)
-            area = cv2.contourArea(cnt)
+            if cv2.contourArea(cnt) > 100:
+                if(cv2.arcLength(cnt, True)) > 100:
+                    total_contour +=1
+                    print(f"What is : {cv2.contourArea(cnt)}")
+                    pjg = cv2.arcLength(cnt, True)
+                    print(cv2.arcLength(cnt, True))
+                    cv2.drawContours(original,[cnt], 0,255,0)
+                    cv2.drawContours(clean_close, [cnt], -1, 255, -1)
 
-            if area < 30:
-                continue
+     
+        
 
-            x,y,w,h = cv2.boundingRect(cnt)
-            aspect_ratio = w / (h + 1e-5)
+        
 
-            features.append([length, area, aspect_ratio])
-            valid_contours.append(cnt)
-
-        if len(features) < 2:
-            st.warning("Contour terlalu sedikit ⚠️")
-            return original, original, original, original
-
-        X = np.array(features)
-
-        # Normalisasi
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
-
-        # Clustering
-        if method == "K-Means":
-            model = KMeans(n_clusters=k, random_state=0, n_init=10)
-            labels = model.fit_predict(X_scaled)
-
-            means = [X[labels==i][:,0].mean() for i in range(k)]
-            crack_cluster = int(np.argmax(means))
-
-        else:
-            model = DBSCAN(eps=eps, min_samples=min_samples)
-            labels = model.fit_predict(X_scaled)
-
-            unique = [l for l in set(labels) if l != -1]
-            if len(unique) == 0:
-                crack_cluster = -1
-            else:
-                means = [X[labels==i][:,0].mean() for i in unique]
-                crack_cluster = unique[int(np.argmax(means))]
-
-        # Visualisasi
-        vis = original.copy()
-
-        for i, cnt in enumerate(valid_contours):
-            if labels[i] == crack_cluster:
-                color = (0,0,255)  # merah
-            else:
-                color = (255,0,0)  # biru
-
-            cv2.drawContours(vis, [cnt], -1, color, 2)
-
-            x,y,w,h = cv2.boundingRect(cnt)
-            length = int(X[i][0])
-            area = int(X[i][1])
-
-            cv2.putText(vis, f"L:{length} A:{area}",
-                        (x, y-5),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.4, color, 1)
-
-        return original,closing,dilated,vis
+        return original,closing,dilated,clean_close
 
     except Exception as e:
         st.error(f"Error: {e}")
