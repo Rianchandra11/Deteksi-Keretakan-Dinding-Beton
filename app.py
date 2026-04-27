@@ -1,29 +1,17 @@
 import streamlit as st
 import cv2
 import numpy as np
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans, DBSCAN
 
-st.title("Deteksi Retakan (Clustering)")
+st.title("Deteksi Retakan Dinding Beton")
 
 # Upload
 uploaded_file = st.file_uploader("Upload gambar", type=["jpg","png","jpeg"])
-
-# Pilih metode clustering
-method = st.selectbox("Pilih Clustering", ["K-Means", "DBSCAN"])
-
-# Parameter
-if method == "K-Means":
-    k = st.slider("Jumlah Cluster (K)", 2, 4, 2)
-else:
-    eps = st.slider("EPS (DBSCAN)", 0.1, 1.5, 0.5)
-    min_samples = st.slider("Min Samples", 2, 10, 3)
 
 def grayscale(img):
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     return gray
 def blurimg(img_gray):
-    blur = cv2.medianBlur(img_gray, 21,0)
+    blur = cv2.GaussianBlur(img_gray, (3,3),0)
     return blur
 def image_enhancement(img_gray):
     clahe = cv2.createCLAHE(2.0,(8,8))
@@ -37,7 +25,7 @@ def process_image(file_bytes):
 
         if img is None:
             st.error("Gagal membaca gambar")
-            return None, None
+            return None, None, None, None, None, None, None, 0
 
         original = img.copy()
 
@@ -46,37 +34,37 @@ def process_image(file_bytes):
         enhanced = image_enhancement(blur)
         canny = cv2.Canny(enhanced, 50, 150)
 
-        # Morphology
         kernel = np.ones((3,3), np.uint8)
         closing = cv2.morphologyEx(canny, cv2.MORPH_CLOSE, kernel)
-        dilated = cv2.dilate(closing, kernel, iterations=7)
+        dilated = cv2.dilate(closing, kernel, iterations=2)
 
-        # Contour
         contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        clean_close = np.zeros_like(dilated)
-        total_contour = 0
+
         detect = img.copy()
+        total_contour = 0
+
         for cnt in contours:
-            if cv2.contourArea(cnt) > 100:
-                if(cv2.arcLength(cnt, True)) > 100:
-                    total_contour +=1
-                    print(f"What is : {cv2.contourArea(cnt)}")
-                    pjg = cv2.arcLength(cnt, True)
-                    print(cv2.arcLength(cnt, True))
-                    cv2.drawContours(detect,[cnt], 0,255,0)
-                    cv2.drawContours(clean_close, [cnt], -1, 255, -1)
+            if cv2.contourArea(cnt) > 100 and cv2.arcLength(cnt, True) > 100:
+                total_contour += 1
 
-     
-        
+                x, y, w, h = cv2.boundingRect(cnt)
+                length = int(cv2.arcLength(cnt, True))
 
-        
+                cv2.drawContours(detect, [cnt], -1, (0,255,0), 2)
 
-        return original,closing,dilated,detect
+                cv2.putText(detect,
+                            f"L:{length}",
+                            (x, y-5),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5,
+                            (0,255,0),
+                            1)
+
+        return original, gray, blur, enhanced, closing, dilated, detect, total_contour
 
     except Exception as e:
         st.error(f"Error: {e}")
-        return None, None, None, None
-
+        return None, None, None, None, None, None, None, 0
 
 # MAIN
 if uploaded_file is None:
@@ -84,16 +72,39 @@ if uploaded_file is None:
 else:
     file_bytes = uploaded_file.read()
 
-    original,clos,dil,result = process_image(file_bytes)
+    original, gray, blur, enhanced, closing, dilated, detect, total_contour = process_image(file_bytes)
 
     if original is not None:
+        if total_contour > 0:
+            st.markdown(
+                f"<h2 style='text-align: center; color: red;'>Total Retakan: {total_contour}</h2>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                "<h2 style='text-align: center; color: green;'>Tidak Ada Retakan</h2>",
+                unsafe_allow_html=True
+            )
+        st.divider()
+        st.subheader(" Image Preprocessing")
+
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.image(original, caption="Gambar Asli", channels="BGR")
+            st.image(original, caption="Original", channels="BGR")
         with col2:
-            st.image(clos, caption= "Closing")
-        with col3: 
-            st.image(dil,caption="Dilation (Closing)")
+            st.image(gray, caption="Grayscale")
+        with col3:
+            st.image(blur, caption="Blur")
         with col4:
-            st.image(result, caption="Hasil Contour", channels="BGR")
+            st.image(enhanced, caption="Enhancement")
+        st.divider()
+        st.subheader("⚙️ Edge, Morphology & Contour")
+        col5, col6, col7 = st.columns(3)
+
+        with col5:
+            st.image(closing, caption="Closing")
+        with col6:
+            st.image(dilated, caption="Dilation")
+        with col7:
+            st.image(detect, caption="Detected Crack", channels="BGR")
