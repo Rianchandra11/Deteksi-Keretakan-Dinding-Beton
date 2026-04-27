@@ -54,7 +54,7 @@ def process_image(file_bytes):
         # Contour
         contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         clean_close = np.zeros_like(dilated)
-
+        total_contour = 0
 
         for cnt in contours:
             if cv2.contourArea(cnt) > 100:
