@@ -55,7 +55,7 @@ def process_image(file_bytes):
         contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         clean_close = np.zeros_like(dilated)
         total_contour = 0
-
+        detect = img.copy()
         for cnt in contours:
             if cv2.contourArea(cnt) > 100:
                 if(cv2.arcLength(cnt, True)) > 100:
@@ -63,7 +63,7 @@ def process_image(file_bytes):
                     print(f"What is : {cv2.contourArea(cnt)}")
                     pjg = cv2.arcLength(cnt, True)
                     print(cv2.arcLength(cnt, True))
-                    cv2.drawContours(original,[cnt], 0,255,0)
+                    cv2.drawContours(detect,[cnt], 0,255,0)
                     cv2.drawContours(clean_close, [cnt], -1, 255, -1)
 
      
@@ -71,7 +71,7 @@ def process_image(file_bytes):
 
         
 
-        return original,closing,dilated,clean_close
+        return original,closing,dilated,detect
 
     except Exception as e:
         st.error(f"Error: {e}")
@@ -96,4 +96,4 @@ else:
         with col3: 
             st.image(dil,caption="Dilation (Closing)")
         with col4:
-            st.image(result, caption="Hasil Clustering", channels="BGR")
+            st.image(result, caption="Hasil Contour", channels="BGR")
