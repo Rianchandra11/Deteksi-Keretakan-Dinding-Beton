@@ -112,5 +112,5 @@ else:
     if total_contour > 0:
         for k in ket:
             st.write(k)
-        else:
-            st.write("Tidak ada retakan yang terdeteksi")
+    else:
+        st.write("Tidak ada retakan yang terdeteksi")
