@@ -17,15 +17,30 @@ def image_enhancement(img_blur):
     clahe = cv2.createCLAHE(2.0,(8,8))
     enhanced = clahe.apply(img_blur)
     return enhanced
-
+warna = [
+            (0, 0, 255),   
+            (0, 255, 0),   
+            (255, 0, 0),   
+            (0, 255, 255), 
+            (0, 0, 0),
+            (255,255,255)
+        ]
+deskripsi_warna = [
+    "Merah",
+    "Hijau",
+    "Biru",
+    "Kuning",
+    "Hitam"
+]
 def process_image(file_bytes):
+    
     try:
         file_bytes = np.asarray(bytearray(file_bytes), dtype=np.uint8)
         img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
         if img is None:
             st.error("Gagal membaca gambar")
-            return None, None, None, None, None, None, None, None, 0
+            return None, None, None, None, None, None, None, None, None, 0
 
         original = img.copy()
 
@@ -37,42 +52,35 @@ def process_image(file_bytes):
         kernel = np.ones((3,3), np.uint8)
         closing = cv2.morphologyEx(canny, cv2.MORPH_CLOSE, kernel)
         dilated = cv2.dilate(closing, kernel, iterations=1)
-
+        
         contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+        ket = []
         detect = img.copy()
         total_contour = 0
-        i = 0
         for cnt in contours:
+        
             if cv2.contourArea(cnt) > 100 and cv2.arcLength(cnt, True) > 100:
-                total_contour += 1
-
-                x, y, w, h = cv2.boundingRect(cnt)
+                if total_contour > len(warna):
+                    total_contour =0
                 length = int(cv2.arcLength(cnt, True))
 
-                cv2.drawContours(detect, [cnt], -1, (0,255,0), 2)
-
-                cv2.putText(detect,
-                            f"Retakan {i+1}: {length}",
-                            (x, y-5),
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.5,
-                            (0,255,0),
-                            1)
-
-        return original, gray, blur, enhanced, canny, closing, dilated, detect, total_contour
+                cv2.drawContours(detect, [cnt], -1, warna[total_contour], 2)
+                ket.append(f"Retakan ke - {total_contour+1} ({deskripsi_warna[total_contour]}) : {int(length)} pixel")
+                total_contour += 1
+                
+        return original, gray, blur, enhanced, canny, closing, dilated, detect,ket,  total_contour
 
     except Exception as e:
         st.error(f"Error: {e}")
         return None, None, None, None, None, None, None, None, 0
 
-# MAIN
+
 if uploaded_file is None:
-    st.info("Silakan upload gambar dulu 👆")
+    st.info("Silakan upload gambar terlebih dahulu")
 else:
     file_bytes = uploaded_file.read()
 
-    original, gray, blur, enhanced, canny, closing, dilated, detect, total_contour = process_image(file_bytes)
+    original, gray, blur, enhanced, canny, closing, dilated, detect, ket, total_contour = process_image(file_bytes)
 
     if original is not None:
         if total_contour > 0:
@@ -86,26 +94,31 @@ else:
                 unsafe_allow_html=True
             )
         st.divider()
-        st.subheader(" Image Preprocessing")
-
+        st.subheader("Image Preprocessing")
         col1, col2, col3, col4 = st.columns(4)
-
         with col1:
-            st.image(original, caption="Original", channels="BGR")
+            st.image(original, caption="Gambar Awal", channels="BGR")
         with col2:
             st.image(gray, caption="Grayscale")
         with col3:
-            st.image(blur, caption="Gaussian Blur")
+            st.image(blur, caption="Gaussian Blur (15x15)")
         with col4:
             st.image(enhanced, caption="Enhancement")
         st.divider()
-        st.subheader("Canny, Edge, Morphology & Contour")
+        st.subheader("Canny, Morphology & Contour")
         col5, col6, col7, col8 = st.columns(4)
         with col5:
             st.image(canny, caption="Canny")
         with col6:
-            st.image(closing, caption="Closing")
+            st.image(closing, caption="Closing (3x3)")
         with col7:
-            st.image(dilated, caption="Dilation")
+            st.image(dilated, caption="Dilation (3x3)")
         with col8:
-            st.image(detect, caption="Detected Crack", channels="BGR")
+            st.image(detect, caption="Garis Retakan", channels="BGR")
+        st.divider()
+        st.subheader("Detail Retakan")
+        if total_contour > 0:
+            for k in ket:
+                st.write(k)
+        else:
+            st.write("Tidak ada retakan yang terdeteksi")
