@@ -58,8 +58,12 @@ def process_image(file_bytes):
         detect = img.copy()
         total_contour = 0
         for cnt in contours:
-        
-            if cv2.contourArea(cnt) > 100 and cv2.arcLength(cnt, True) > 100:
+            x,y,w,h = cv2.boundingRect(cnt)
+            length = cv2.arcLength(cnt, True)
+            area = cv2.contourArea(cnt)
+            aspect_ratio = max(w,h) / (min(w,h)+1)
+            print(f"aspect : {aspect_ratio}, {length}, {area}")
+            if aspect_ratio > 2.5 or (area > 400 and length > 200):
                 if total_contour > len(warna):
                     total_contour =0
                 length = int(cv2.arcLength(cnt, True))
@@ -116,7 +120,7 @@ else:
         with col8:
             st.image(detect, caption="Garis Retakan", channels="BGR")
         st.divider()
-        st.subheader("Detail Retakan")
+        st.subheader("Detail Panjang Retakan")
         if total_contour > 0:
             for k in ket:
                 st.write(k)
