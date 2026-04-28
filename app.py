@@ -11,7 +11,7 @@ def grayscale(img):
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     return gray
 def blurimg(img_gray):
-    blur = cv2.GaussianBlur(img_gray, (15,15),0)
+    blur = cv2.GaussianBlur(img_gray, (7,7),0)
     return blur
 def image_enhancement(img_blur):
     clahe = cv2.createCLAHE(2.0,(8,8))
@@ -63,7 +63,7 @@ def process_image(file_bytes):
             area = cv2.contourArea(cnt)
             aspect_ratio = max(w,h) / (min(w,h)+1)
             print(f"aspect : {aspect_ratio}, {length}, {area}")
-            if aspect_ratio > 2.5 or (area > 400 and length > 200):
+            if aspect_ratio > 2.1 and (area > 100 and length > 100):
                 if total_contour > len(warna):
                     total_contour =0
                 length = int(cv2.arcLength(cnt, True))
@@ -85,44 +85,32 @@ else:
     file_bytes = uploaded_file.read()
 
     original, gray, blur, enhanced, canny, closing, dilated, detect, ket, total_contour = process_image(file_bytes)
-
-    if original is not None:
-        if total_contour > 0:
-            st.markdown(
-                f"<h2 style='text-align: center; color: red;'>Total Retakan: {total_contour}</h2>",
-                unsafe_allow_html=True
-            )
-        else:
-            st.markdown(
-                "<h2 style='text-align: center; color: green;'>Tidak Ada Retakan</h2>",
-                unsafe_allow_html=True
-            )
-        st.divider()
-        st.subheader("Image Preprocessing")
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.image(original, caption="Gambar Awal", channels="BGR")
-        with col2:
-            st.image(gray, caption="Grayscale")
-        with col3:
-            st.image(blur, caption="Gaussian Blur (15x15)")
-        with col4:
-            st.image(enhanced, caption="Enhancement")
-        st.divider()
-        st.subheader("Canny, Morphology & Contour")
-        col5, col6, col7, col8 = st.columns(4)
-        with col5:
-            st.image(canny, caption="Canny")
-        with col6:
-            st.image(closing, caption="Closing (3x3)")
-        with col7:
-            st.image(dilated, caption="Dilation (3x3)")
-        with col8:
-            st.image(detect, caption="Garis Retakan", channels="BGR")
-        st.divider()
-        st.subheader("Detail Panjang Retakan")
-        if total_contour > 0:
-            for k in ket:
-                st.write(k)
+    st.divider()
+    st.subheader("Image Preprocessing")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.image(original, caption="Gambar Awal", channels="BGR")
+    with col2:
+        st.image(gray, caption="Grayscale")
+    with col3:
+        st.image(blur, caption="Gaussian Blur (15x15)")
+    with col4:
+        st.image(enhanced, caption="Enhancement")
+    st.divider()
+    st.subheader("Canny, Morphology & Contour")
+    col5, col6, col7, col8 = st.columns(4)
+    with col5:
+        st.image(canny, caption="Canny")
+    with col6:
+        st.image(closing, caption="Closing (3x3)")
+    with col7:
+        st.image(dilated, caption="Dilation (3x3)")
+    with col8:
+        st.image(detect, caption="Garis Retakan", channels="BGR")
+    st.divider()
+    st.subheader(f"Detail Panjang Retakan ({total_contour})")
+    if total_contour > 0:
+        for k in ket:
+            st.write(k)
         else:
             st.write("Tidak ada retakan yang terdeteksi")
