@@ -11,7 +11,7 @@ def grayscale(img):
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     return gray
 def blurimg(img_gray):
-    blur = cv2.GaussianBlur(img_gray, (7,7),0)
+    blur = cv2.GaussianBlur(img_gray, (9,9),0)
     return blur
 def image_enhancement(img_blur):
     clahe = cv2.createCLAHE(2.0,(8,8))
@@ -58,12 +58,9 @@ def process_image(file_bytes):
         detect = img.copy()
         total_contour = 0
         for cnt in contours:
-            x,y,w,h = cv2.boundingRect(cnt)
-            length = cv2.arcLength(cnt, True)
+            lengths = cv2.arcLength(cnt,True)
             area = cv2.contourArea(cnt)
-            aspect_ratio = max(w,h) / (min(w,h)+1)
-            print(f"aspect : {aspect_ratio}, {length}, {area}")
-            if aspect_ratio > 2.1 and (area > 100 and length > 100):
+            if area > 100 and lengths > 100:
                 if total_contour > len(warna):
                     total_contour =0
                 length = int(cv2.arcLength(cnt, True))
@@ -93,7 +90,7 @@ else:
     with col2:
         st.image(gray, caption="Grayscale")
     with col3:
-        st.image(blur, caption="Gaussian Blur (15x15)")
+        st.image(blur, caption="Gaussian Blur (9x9)")
     with col4:
         st.image(enhanced, caption="Enhancement")
     st.divider()
@@ -106,7 +103,7 @@ else:
     with col7:
         st.image(dilated, caption="Dilation (3x3)")
     with col8:
-        st.image(detect, caption="Garis Retakan", channels="BGR")
+        st.image(detect, caption="Contour", channels="BGR")
     st.divider()
     st.subheader(f"Detail Panjang Retakan ({total_contour})")
     if total_contour > 0:
