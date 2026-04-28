@@ -60,7 +60,7 @@ def process_image(file_bytes):
         for cnt in contours:
             lengths = cv2.arcLength(cnt,True)
             area = cv2.contourArea(cnt)
-            if area > 100 and lengths > 100:
+            if area > 100 and lengths > 150:
                 if total_contour > len(warna):
                     total_contour =0
                 length = int(cv2.arcLength(cnt, True))
