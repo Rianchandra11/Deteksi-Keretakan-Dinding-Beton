@@ -11,11 +11,11 @@ def grayscale(img):
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     return gray
 def blurimg(img_gray):
-    blur = cv2.GaussianBlur(img_gray, (7,7),0)
+    blur = cv2.GaussianBlur(img_gray, (15,15),0)
     return blur
-def image_enhancement(img_gray):
+def image_enhancement(img_blur):
     clahe = cv2.createCLAHE(2.0,(8,8))
-    enhanced = clahe.apply(img_gray)
+    enhanced = clahe.apply(img_blur)
     return enhanced
 
 def process_image(file_bytes):
@@ -42,7 +42,7 @@ def process_image(file_bytes):
 
         detect = img.copy()
         total_contour = 0
-
+        i = 0
         for cnt in contours:
             if cv2.contourArea(cnt) > 100 and cv2.arcLength(cnt, True) > 100:
                 total_contour += 1
@@ -53,7 +53,7 @@ def process_image(file_bytes):
                 cv2.drawContours(detect, [cnt], -1, (0,255,0), 2)
 
                 cv2.putText(detect,
-                            f"L:{length}",
+                            f"Retakan {i+1}: {length}",
                             (x, y-5),
                             cv2.FONT_HERSHEY_SIMPLEX,
                             0.5,
