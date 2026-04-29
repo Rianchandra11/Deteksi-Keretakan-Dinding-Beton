@@ -46,8 +46,6 @@ def process_image(file_bytes):
             lengths = cv2.arcLength(cnt,True)
             area = cv2.contourArea(cnt)
             if area > 100 and lengths > 150:
-                if total_contour > len(warna):
-                    total_contour =0
                 length = int(cv2.arcLength(cnt, True))
                 M = cv2.moments(cnt)
                 if M["m00"] != 0:
