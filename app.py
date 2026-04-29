@@ -49,21 +49,28 @@ def process_image(file_bytes):
                 length = int(cv2.arcLength(cnt, True))
                 epsilon = 0.001 * cv2.arcLength(cnt, True)
                 approx = cv2.approxPolyDP(cnt, epsilon, True)
-                
+
                 num_points = len(approx)
                 mid_point_index = num_points // 2
                 mid_point = approx[mid_point_index][0]
-                
                 cX, cY = mid_point[0], mid_point[1]
 
-                # TULIS TEKS (Sekarang ditulis di lapisan paling atas)
-                # Gunakan warna teks putih agar kontras dengan warna retakan apa pun
-                # Gunakan ukuran font yang lebih kecil (misal: 0.4) dan offset lebih besar agar tidak 'ketimpa'
-                offset_y = -10
+                offset_x = -40  
+                offset_y = 5    
+               
+                text_label = f"#{total_contour} >"
+                (t_w, t_h), _ = cv2.getTextSize(text_label, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
+                margin = 10
+                posisi_x_kiri = cX - t_w - margin
+
+                
                 cv2.drawContours(detect, [cnt], -1, (0,0,0), 2)
-                cv2.putText(detect, f"#{total_contour+1}", 
-                            (cX, cY + offset_y),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
+                cv2.putText(detect, text_label, 
+                (posisi_x_kiri, cY + offset_y), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+                # cv2.putText(detect, f"#{total_contour+1}", 
+                #             (cX, cY + offset_y),
+                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
                 ket.append(f"Retakan ke - #{total_contour+1} : {int(length)} pixel")
                 total_contour += 1
                 
