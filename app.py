@@ -36,40 +36,39 @@ def process_image(file_bytes):
 
         kernel = np.ones((3,3), np.uint8)
         closing = cv2.morphologyEx(canny, cv2.MORPH_CLOSE, kernel)
-        dilated = cv2.dilate(closing, kernel, iterations=1)
-        
-        contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        dilasi = cv2.dilate(closing, kernel, iterations=1)
+        contours, _ = cv2.findContours(dilasi, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         ket = []
         detect = img.copy()
         total_contour = 0
+        xList = []
+        yList = []
         for cnt in contours:
             lengths = cv2.arcLength(cnt,True)
             area = cv2.contourArea(cnt)
             if area > 100 and lengths > 150:
                 length = int(cv2.arcLength(cnt, True))
-                
+                rect = cv2.minAreaRect(cnt)
+                box = cv2.boxPoints(rect)
+                box = np.intp(box) 
+                rata = np.mean(box, axis=0)
+                min_x = int(rata[0])
+                min_y = int(rata[1])
+                xList.append(min_x)
+                yList.append(min_y)
+                print(f"test : {min_x}, {min_y}" )
                 cv2.drawContours(detect, [cnt], -1, (0,0,0), 2)
-                x, y, w, h = cv2.boundingRect(cnt)
-
-                posisi_x = x - 35 
-                posisi_y = y -35 
-
-                
-                if posisi_x < 0: posisi_x = 5
-                if posisi_y <0 : posisi_y = 0
-                cv2.putText(detect, f"{total_contour+1}", (posisi_x, posisi_y), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                # cv2.putText(detect, f"#{total_contour+1}", 
-                #             (cX, cY + offset_y),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
                 ket.append(f"Retakan ke - #{total_contour+1} : {int(length)} pixel")
                 total_contour += 1
-                
-        return original, gray, blur, enhanced, canny, closing, dilated, detect,ket,  total_contour
+        if total_contour >0:
+            for i in range(total_contour):
+                cv2.putText(detect, f"{i+1}", (xList[i],yList[i]), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        return original, gray, blur, enhanced, canny, closing, dilasi, detect,ket,  total_contour
 
     except Exception as e:
         st.error(f"Error: {e}")
-        return None, None, None, None, None, None, None, None, 0
+        return None, None, None, None, None, None, None, None, None, 0
 
 
 if uploaded_file is None:
@@ -93,11 +92,11 @@ else:
     st.subheader("Canny, Morphology & Contour")
     col5, col6, col7, col8 = st.columns(4)
     with col5:
-        st.image(canny, caption="Canny")
+        st.image(canny, caption="Canny (3x3)")
     with col6:
         st.image(closing, caption="Closing (3x3)")
     with col7:
-        st.image(dilated, caption="Dilation (3x3)")
+        st.image(dilated, caption="Dilasi (3x3)")
     with col8:
         st.image(detect, caption="Contour", channels="BGR")
     st.divider()
