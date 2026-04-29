@@ -47,27 +47,18 @@ def process_image(file_bytes):
             area = cv2.contourArea(cnt)
             if area > 100 and lengths > 150:
                 length = int(cv2.arcLength(cnt, True))
-                epsilon = 0.001 * cv2.arcLength(cnt, True)
-                approx = cv2.approxPolyDP(cnt, epsilon, True)
-
-                num_points = len(approx)
-                mid_point_index = num_points // 2
-                mid_point = approx[mid_point_index][0]
-                cX, cY = mid_point[0], mid_point[1]
-
-                offset_x = -40  
-                offset_y = 5    
-               
-                text_label = f"#{total_contour} >"
-                (t_w, t_h), _ = cv2.getTextSize(text_label, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
-                margin = 10
-                posisi_x_kiri = cX - t_w - margin
-
                 
                 cv2.drawContours(detect, [cnt], -1, (0,0,0), 2)
-                cv2.putText(detect, text_label, 
-                (posisi_x_kiri, cY + offset_y), 
-                cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+                x, y, w, h = cv2.boundingRect(cnt)
+
+                posisi_x = x - 35 
+                posisi_y = y + 15
+
+                
+                if posisi_x < 0: posisi_x = 5
+                
+                cv2.putText(detect, f"#{total_contour+1}", (posisi_x, posisi_y), 
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 # cv2.putText(detect, f"#{total_contour+1}", 
                 #             (cX, cY + offset_y),
                 #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
