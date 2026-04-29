@@ -52,11 +52,11 @@ def process_image(file_bytes):
                 x, y, w, h = cv2.boundingRect(cnt)
 
                 posisi_x = x - 35 
-                posisi_y = y + 15
+                posisi_y = y -35 
 
                 
                 if posisi_x < 0: posisi_x = 5
-                
+                if posisi_y <0 : posisi_y = 0
                 cv2.putText(detect, f"{total_contour+1}", (posisi_x, posisi_y), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 # cv2.putText(detect, f"#{total_contour+1}", 
