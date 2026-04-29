@@ -57,7 +57,7 @@ def process_image(file_bytes):
                 
                 if posisi_x < 0: posisi_x = 5
                 
-                cv2.putText(detect, f"#{total_contour+1}", (posisi_x, posisi_y), 
+                cv2.putText(detect, f"{total_contour+1}", (posisi_x, posisi_y), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 # cv2.putText(detect, f"#{total_contour+1}", 
                 #             (cX, cY + offset_y),
