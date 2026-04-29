@@ -47,12 +47,14 @@ def process_image(file_bytes):
             area = cv2.contourArea(cnt)
             if area > 100 and lengths > 150:
                 length = int(cv2.arcLength(cnt, True))
-                M = cv2.moments(cnt)
-                if M["m00"] != 0:
-                    cX = int(M["m10"] / M["m00"])
-                    cY = int(M["m01"] / M["m00"])
-                    cv2.putText(detect, f"#{total_contour}", (cX, cY), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+             
+                x, y, w, h = cv2.boundingRect(cnt)
+                cX = x + w // 2
+                cY = y + h // 2
+                offset = 10
+                cv2.putText(detect, f"#{total_contour+1}", 
+                            (cX + offset, cY - offset),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
                 cv2.drawContours(detect, [cnt], -1, (0,0,0), 2)
                 ket.append(f"Retakan ke - #{total_contour+1} : {int(length)} pixel")
                 total_contour += 1
